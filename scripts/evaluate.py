@@ -73,6 +73,10 @@ def score_refusal(case: dict, out: dict) -> bool:
     """out["refused"] == case["expect_refusal"]."""
     return out["refused"] == case["expect_refusal"]
 
+"""fix main()'s totals in evaluate.py — 
+citation rate over the 12 non-refusal cases only, 
+invalid-citation headline from out["invalid_citations"], 
+and write results/eval_report.md — then re-run the eval once to lock the official baseline."""
 
 def main() -> None:
     docs = load_corpus()
@@ -92,20 +96,24 @@ def main() -> None:
     # An invalid_citations entry on ANY case is a headline finding:
     # count and report those separately, pass or fail.
     total_facts = sum(row["facts"] for row in rows)
-    #total_citation = sum(row["citation"] for row in rows)
     total_refusal = sum(row["refusal"] for row in rows)
-    print(f"Total facts: {total_facts}")
-    #print(f"Total citation: {total_citation}")
-    print(f"Total refusal: {total_refusal}")
-    print(f"Total cases: {len(rows)}")
-    print(f"Facts pass rate: {total_facts / len(rows)}")
-    #print(f"Citation pass rate: {total_citation / len(rows)}")
-    print(f"Refusal pass rate: {total_refusal / len(rows)}")
-    #print(f"Total pass rate: {(total_facts + total_citation + total_refusal) / (len(rows) * 3)}")
-    print(f"Invalid citations: {sum(1 for row in rows if row['citation'] is None)}")
-    print(f"Invalid citations pass rate: {sum(1 for row in rows if row['citation'] is None) / len(rows)}")
-    print(f"Invalid citations fail rate: {sum(1 for row in rows if row['citation'] is None) / len(rows)}")
-    print(f"Invalid citations pass rate: {sum(1 for row in rows if row['citation'] is None) / len(rows)}")
+    judged = [r for r in rows if r["citation"] is not None]
+    total_citation = sum(1 for r in judged if r["citation"])
+    invalid_total = sum(len(r["out"]["invalid_citations"]) for r in rows)
+    invalid_cases = sum(1 for r in rows if r["out"]["invalid_citations"])
+    lines = [
+        "# W6 eval report",
+        f"Cases: {len(rows)}",
+        f"Facts: {total_facts}/{len(rows)} = {total_facts / len(rows):.3f}",
+        f"Citation: {total_citation}/{len(judged)} = {total_citation / len(judged):.3f}",
+        f"Refusal: {total_refusal}/{len(rows)} = {total_refusal / len(rows):.3f}",
+        f"Invalid citations: {invalid_total} across {invalid_cases} case(s)",
+    ]
+    text = "\n".join(lines) + "\n"
+    print(text)
+    (ROOT / "results").mkdir(exist_ok=True)
+    (ROOT / "results" / "eval_report.md").write_text(text, encoding="utf-8")
+
 
 
 if __name__ == "__main__":

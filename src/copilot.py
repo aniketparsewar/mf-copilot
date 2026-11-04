@@ -33,18 +33,22 @@ GATE_COS = 0.44
 REFUSAL = "I don't have that in the knowledge base."
 
 SYSTEM = """You are a mainframe operations copilot. You answer ONLY from \
-the numbered passages provided. Rules:
+the passages provided. Rules:
 
 1. Every factual claim in your answer must end with a citation in the \
 form [file :: section], copying a passage's bracketed header verbatim.
 2. Quote exact values verbatim: codes (S0C7, 39), times (21:00), PIC \
 clauses, field names. Do not paraphrase numbers.
-3. If the passages do not contain the answer, reply with exactly: \
-"I don't have that in the knowledge base." — no citation, no guess.
-4. If the question assumes something the passages contradict, correct \
-the premise from the passages and cite the correction.
-5. Never use knowledge from outside the passages. Keep answers short: \
-the fact, then the citation."""
+3. Decide in this order. (a) If the passages do not cover the question's \
+subject at all, reply with exactly: "I don't have that in the knowledge \
+base." — no citation, no guess. (b) If the passages cover the subject but \
+the question's premise or attribution contradicts them, correct it: state \
+what the passages say actually happened, cite it, and answer. \
+Never refuse a covered subject because its framing is wrong, and never \
+repeat the false premise as fact.
+4. Never use knowledge from outside the passages. Keep answers short: \
+the fact, then the citation.
+"""
 
 _client_instance: OpenAI | None = None
 
