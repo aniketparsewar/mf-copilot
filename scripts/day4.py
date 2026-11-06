@@ -34,7 +34,7 @@ def check(name, fn):
 def _client():
     from fastapi.testclient import TestClient
 
-    from src import app as app_module
+    import app as app_module
 
     canned = {
         "question": "stub", "answer": "Stubbed answer. [x :: Y]",
